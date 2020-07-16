@@ -1,4 +1,4 @@
-ame: Docker Image CI
+name: Docker Image Staging CD
 
 on:
   push:
@@ -28,16 +28,16 @@ jobs:
       run: dotnet publish -c release
       working-directory: ./src/BikeDataProject.API/
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag statistic-api:${{ github.sha }}
+      run: docker build . --file Dockerfile --tag statistic-api:staging
       working-directory: ./src/BikeDataProject.API/
     - name: Login to GitHub Packages with Docker
       run: echo ${{ secrets.PACKAGES_SECRET }} | docker login https://docker.pkg.github.com -u xivk --password-stdin
     - name: Tag the Docker image
-      run: docker tag statistic-api:${{ github.sha }} docker.pkg.github.com/bikedataproject/statistic-api/statistic-api:${{ github.sha }}
+      run: docker tag statistic-api:staging docker.pkg.github.com/bikedataproject/statistic-api/statistic-api:staging
       working-directory: ./src/BikeDataProject.API/
     - name: Build the Docker image for the package
-      run: docker build -t docker.pkg.github.com/bikedataproject/statistic-api/statistic-api:${{ github.sha }} .
+      run: docker build -t docker.pkg.github.com/bikedataproject/statistic-api/statistic-api:staging .
       working-directory: ./src/BikeDataProject.API/
     - name: Publish the image to GitHub packages.
-      run: docker push docker.pkg.github.com/bikedataproject/statistic-api/statistic-api:${{ github.sha }}
+      run: docker push docker.pkg.github.com/bikedataproject/statistic-api/statistic-api:staging
       working-directory: ./src/BikeDataProject.API/
