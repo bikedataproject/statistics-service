@@ -16,6 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{D4D7AB03-1
 		BikeDataProject.Statistics.sln = BikeDataProject.Statistics.sln
 		.gitignore = .gitignore
 		DEVELOPMENT.md = DEVELOPMENT.md
+		nuget.config = nuget.config
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{6AC1EF78-F736-45A6-8744-CE202782021C}"
@@ -23,10 +24,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.Tools.ImportAreas", "tools\BikeDataProject.Statistics.Tools.ImportAreas\BikeDataProject.Statistics.Tools.ImportAreas.csproj", "{837F95E1-C6E3-45AB-8940-C4D7C06F9528}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.Tools.ExportVectorTiles", "tools\BikeDataProject.Statistics.Tools.ExportVectorTiles\BikeDataProject.Statistics.Tools.ExportVectorTiles.csproj", "{D912FAAE-176C-4211-A80B-FCE5AA041512}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetTopologySuite.IO.VectorTiles.Mapbox", "..\..\anyways\libraries\NetTopologySuite.IO.VectorTiles\src\NetTopologySuite.IO.VectorTiles.Mapbox\NetTopologySuite.IO.VectorTiles.Mapbox.csproj", "{315C9A10-B719-4456-97FC-C929D962908D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetTopologySuite.IO.VectorTiles", "..\..\anyways\libraries\NetTopologySuite.IO.VectorTiles\src\NetTopologySuite.IO.VectorTiles\NetTopologySuite.IO.VectorTiles.csproj", "{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -89,37 +86,11 @@ Global
 		{D912FAAE-176C-4211-A80B-FCE5AA041512}.Release|x64.Build.0 = Release|Any CPU
 		{D912FAAE-176C-4211-A80B-FCE5AA041512}.Release|x86.ActiveCfg = Release|Any CPU
 		{D912FAAE-176C-4211-A80B-FCE5AA041512}.Release|x86.Build.0 = Release|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Debug|x64.Build.0 = Debug|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Debug|x86.Build.0 = Debug|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Release|x64.ActiveCfg = Release|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Release|x64.Build.0 = Release|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Release|x86.ActiveCfg = Release|Any CPU
-		{315C9A10-B719-4456-97FC-C929D962908D}.Release|x86.Build.0 = Release|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Debug|x64.Build.0 = Debug|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Debug|x86.Build.0 = Debug|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Release|x64.ActiveCfg = Release|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Release|x64.Build.0 = Release|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Release|x86.ActiveCfg = Release|Any CPU
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C4FE2DBC-3D55-46C0-BA43-6D5216356CDD} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}
 		{C4608BD9-0455-4EF0-A5E2-AA20B7DEE22D} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}
 		{837F95E1-C6E3-45AB-8940-C4D7C06F9528} = {6AC1EF78-F736-45A6-8744-CE202782021C}
 		{D912FAAE-176C-4211-A80B-FCE5AA041512} = {6AC1EF78-F736-45A6-8744-CE202782021C}
-		{315C9A10-B719-4456-97FC-C929D962908D} = {6AC1EF78-F736-45A6-8744-CE202782021C}
-		{5AA269AD-4FBD-4E9D-BA79-6055F5A3E4D6} = {6AC1EF78-F736-45A6-8744-CE202782021C}
 	EndGlobalSection
 EndGlobal
