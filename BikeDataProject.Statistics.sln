@@ -9,6 +9,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.Service", "src\BikeDataProject.Statistics.Service\BikeDataProject.Statistics.Service.csproj", "{C4608BD9-0455-4EF0-A5E2-AA20B7DEE22D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{D4D7AB03-1554-4CBF-8D3F-46BBD7EBB785}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE = LICENSE
+		README.md = README.md
+		BikeDataProject.Statistics.sln = BikeDataProject.Statistics.sln
+		.gitignore = .gitignore
+		DEVELOPMENT.md = DEVELOPMENT.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{6AC1EF78-F736-45A6-8744-CE202782021C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.Tools.ImportAreas", "tools\BikeDataProject.Statistics.Tools.ImportAreas\BikeDataProject.Statistics.Tools.ImportAreas.csproj", "{837F95E1-C6E3-45AB-8940-C4D7C06F9528}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,9 +59,22 @@ Global
 		{C4608BD9-0455-4EF0-A5E2-AA20B7DEE22D}.Release|x64.Build.0 = Release|Any CPU
 		{C4608BD9-0455-4EF0-A5E2-AA20B7DEE22D}.Release|x86.ActiveCfg = Release|Any CPU
 		{C4608BD9-0455-4EF0-A5E2-AA20B7DEE22D}.Release|x86.Build.0 = Release|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Debug|x64.Build.0 = Debug|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Debug|x86.Build.0 = Debug|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Release|Any CPU.Build.0 = Release|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Release|x64.ActiveCfg = Release|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Release|x64.Build.0 = Release|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Release|x86.ActiveCfg = Release|Any CPU
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C4FE2DBC-3D55-46C0-BA43-6D5216356CDD} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}
 		{C4608BD9-0455-4EF0-A5E2-AA20B7DEE22D} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}
+		{837F95E1-C6E3-45AB-8940-C4D7C06F9528} = {6AC1EF78-F736-45A6-8744-CE202782021C}
 	EndGlobalSection
 EndGlobal

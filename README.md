@@ -1,4 +1,4 @@
-# geo-api
+# statistics service
 
 ## About this repository
 
@@ -6,16 +6,7 @@
 ![Docker Image CI](https://github.com/bikedataproject/statistic-api/workflows/Docker%20Image%20CI%20Build/badge.svg)
 ![Docker Image CD](https://github.com/bikedataproject/statistic-api/workflows/Docker%20Image%20Staging%20CD/badge.svg)
 
-This repository holds code to publish open data.
-
-## How to build & run this project
-
-```bash
-# Creating the image
-docker build -t statistic-api:latest .
-# Create the container based on the downloaded/created image
-docker run -d --name statistic-api statistic-api:latest
-```
+This repository contains code for the statistics service. A small service to generate basic statistics on the collected data. 
 
 ## Coding conventions
 
