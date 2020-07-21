@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace BikeDataProject.Statistics.Domain
 {
     public class Area
@@ -7,5 +9,9 @@ namespace BikeDataProject.Statistics.Domain
         public byte[] Geometry { get; set; }
         
         public int? ParentAreaId { get; set; }
+        
+        public List<AreaAttribute> AreaAttributes { get; set; }
+        
+        public List<AreaStatistic> AreaStatistics { get; set; }
     }
 }

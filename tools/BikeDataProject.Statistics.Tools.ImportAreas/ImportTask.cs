@@ -76,7 +76,17 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                         if (name == "id" || name == "parents") continue;
 
                         var value = nextValue.feature.Attributes[name];
-                        if (!(value is string valueString)) continue;
+                        if (!(value is string valueString))
+                        {
+                            if (value is long)
+                            {
+                                valueString = ((long) value).ToString();
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
                         
                         var areaAttribute = new AreaAttribute()
                         {
