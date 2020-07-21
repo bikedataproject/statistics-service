@@ -440,3 +440,6 @@ MigrationBackup/
 .ionide/
 
 # End of https://www.toptal.com/developers/gitignore/api/code,visualstudiocode,windows,linux,macos,visualstudio
+
+
+# .idea/**
