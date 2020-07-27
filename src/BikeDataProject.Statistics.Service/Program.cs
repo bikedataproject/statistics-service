@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using BikeDataProject.DB.Domain;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,6 @@ namespace BikeDataProject.Statistics.Service
             // read configuration.
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddUserSecrets<Program>()
                 .AddEnvironmentVariables(prefix: EnvVarPrefix)
                 .Build();
             
@@ -27,6 +27,8 @@ namespace BikeDataProject.Statistics.Service
                 .CreateLogger();
             
             // get database connection.
+            Console.WriteLine($"{configuration[$"{Program.EnvVarPrefix}STATS_DB"]}");
+            Console.WriteLine($"{configuration[$"{Program.EnvVarPrefix}DB"]}");
             var connectionString = File.ReadAllText(configuration[$"{Program.EnvVarPrefix}STATS_DB"]);
             var bikeDataConnectionString = File.ReadAllText(configuration[$"{Program.EnvVarPrefix}DB"]);
             var data = configuration["data"];
