@@ -19,6 +19,10 @@ namespace BikeDataProject.Statistics.Service.Tiles
             // read configuration.
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables((c) =>
+                {
+                    c.Prefix = EnvVarPrefix;
+                })
                 .Build();
             
             // setup serilog logging (from configuration).
@@ -27,7 +31,7 @@ namespace BikeDataProject.Statistics.Service.Tiles
                 .CreateLogger();
             
             // get database connection.
-            var connectionString = await File.ReadAllTextAsync(configuration[$"{Program.EnvVarPrefix}STATS_DB"]);
+            var connectionString = await File.ReadAllTextAsync(configuration["STATS_DB"]);
             
             // setup DI.
             var serviceProvider = new ServiceCollection()

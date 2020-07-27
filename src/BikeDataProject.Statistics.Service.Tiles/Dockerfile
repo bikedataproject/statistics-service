@@ -11,7 +11,7 @@ RUN crontab /docker-crontab
 RUN mkdir /var/app
 RUN mkdir /var/app/logs
 COPY ./bin/release/netcoreapp3.1/publish /var/app
-# COPY appsettings.json /var/app/appsettings.json
+COPY appsettings.Production.json /var/app/appsettings.json
 
 # couple data folder data volume.
 VOLUME ["/var/app/data"]
