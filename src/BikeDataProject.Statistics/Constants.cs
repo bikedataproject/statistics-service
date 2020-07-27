@@ -6,7 +6,7 @@ namespace BikeDataProject.Statistics
     {
         public static string StatisticKeyKms = "km";
 
-        public static string StatisticKeySpeed = "kph";
+        public static string StatisticKeyTime = "seconds";
 
         public static string StatisticKeyCount = "count";
     }

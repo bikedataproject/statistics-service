@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -87,10 +88,15 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
             vectorTileTree.Write(_configuration.OutputPath);
         }
 
+        private readonly Random Random = new Random();
+        
         private Feature ToFeature(Area area)
         {
             var postGisReader = new PostGisReader();
             var attributes = new AttributesTable();
+
+            attributes.Add("id", area.AreaId);
+            attributes.Add("parent_id", area.ParentAreaId);
 
             if (area.AreaStatistics != null)
             {                
@@ -101,6 +107,16 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
                     attributes.Add(at.Key, at.Value);
                 }
             }
+
+            if (!attributes.Exists(Constants.StatisticKeyCount))
+                attributes.Add(Constants.StatisticKeyCount,
+                    Random.Next(10000));
+            if (!attributes.Exists(Constants.StatisticKeyKms))
+                attributes.Add(Constants.StatisticKeyKms,
+                    Random.Next(10000));
+            if (!attributes.Exists(Constants.StatisticKeyTime))
+                attributes.Add(Constants.StatisticKeyTime,
+                    Random.Next(10000));
             
             if (area.AreaAttributes != null)
             {
