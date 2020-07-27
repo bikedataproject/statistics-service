@@ -2,9 +2,9 @@
 
 ## About this repository
 
-![.NET Core](https://github.com/bikedataproject/statistic-api/workflows/.NET%20Core/badge.svg)
-![Docker Image CI](https://github.com/bikedataproject/statistic-api/workflows/Docker%20Image%20CI%20Build/badge.svg)
-![Docker Image CD](https://github.com/bikedataproject/statistic-api/workflows/Docker%20Image%20Staging%20CD/badge.svg)
+[![.NET Core](https://github.com/bikedataproject/statistic-api/workflows/.NET%20Core/badge.svg)](https://github.com/bikedataproject/statistics-service/actions?query=workflow%3A%22.NET+Core%22)
+[![Docker Image - Statistics Service (Staging)](https://github.com/bikedataproject/statistics-service/workflows/Docker%20Image%20-%20Statistics%20Service%20(Staging)/badge.svg)](https://github.com/bikedataproject/statistics-service/actions?query=workflow%3A%22Docker+Image+-+Statistics+Service+%28Staging%29%22)
+[![Docker Image - Statistics Tiles Service (Staging)](https://github.com/bikedataproject/statistics-service/workflows/Docker%20Image%20-%20Statistics%20Tiles%20Service%20(Staging)/badge.svg)](https://github.com/bikedataproject/statistics-service/actions?query=workflow%3A%22Docker+Image+-+Statistics+Tiles+Service+%28Staging%29%22)
 
 This repository contains code for the statistics service. A small service to generate basic statistics on the collected data. 
 
