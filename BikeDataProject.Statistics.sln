@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.Tools.ExportVectorTiles", "tools\BikeDataProject.Statistics.Tools.ExportVectorTiles\BikeDataProject.Statistics.Tools.ExportVectorTiles.csproj", "{D912FAAE-176C-4211-A80B-FCE5AA041512}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.Service.Tiles", "src\BikeDataProject.Statistics.Service.Tiles\BikeDataProject.Statistics.Service.Tiles.csproj", "{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -86,11 +88,24 @@ Global
 		{D912FAAE-176C-4211-A80B-FCE5AA041512}.Release|x64.Build.0 = Release|Any CPU
 		{D912FAAE-176C-4211-A80B-FCE5AA041512}.Release|x86.ActiveCfg = Release|Any CPU
 		{D912FAAE-176C-4211-A80B-FCE5AA041512}.Release|x86.Build.0 = Release|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Debug|x64.Build.0 = Debug|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Debug|x86.Build.0 = Debug|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|x64.ActiveCfg = Release|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|x64.Build.0 = Release|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|x86.ActiveCfg = Release|Any CPU
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C4FE2DBC-3D55-46C0-BA43-6D5216356CDD} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}
 		{C4608BD9-0455-4EF0-A5E2-AA20B7DEE22D} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}
 		{837F95E1-C6E3-45AB-8940-C4D7C06F9528} = {6AC1EF78-F736-45A6-8744-CE202782021C}
 		{D912FAAE-176C-4211-A80B-FCE5AA041512} = {6AC1EF78-F736-45A6-8744-CE202782021C}
+		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}
 	EndGlobalSection
 EndGlobal
