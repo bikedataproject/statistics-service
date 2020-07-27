@@ -1,6 +1,12 @@
 # Get .NET Core v3.1 build image
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
 
+# install cron.
+RUN apt-get update
+RUN apt-get install -y cron
+ADD docker-crontab /
+RUN crontab /docker-crontab
+
 # copy api assemblies and files
 RUN mkdir /var/app
 RUN mkdir /var/app/logs
@@ -11,11 +17,6 @@ COPY ./bin/release/netcoreapp3.1/publish /var/app
 VOLUME ["/var/app/data"]
 VOLUME ["/var/app/logs"]
 
-# SET base url
-ENV ASPNETCORE_URLS http://+:5000
-
-# Expose ports
-EXPOSE 5000
-
-# Execute the project build
-ENTRYPOINT ["dotnet", "BikeDataProject.Statistics.Service.dll"]
+# Set the default command to execute when creating a new container
+WORKDIR /var/app/
+ENTRYPOINT cron -f

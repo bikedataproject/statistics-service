@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -25,7 +26,7 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
                 .CreateLogger();
             
             // get database connection.
-            var connectionString = configuration[$"{Program.EnvVarPrefix}STATS_DB"];
+            var connectionString = await File.ReadAllTextAsync(configuration[$"{Program.EnvVarPrefix}STATS_DB"]);
             
             // setup DI.
             var serviceProvider = new ServiceCollection()
