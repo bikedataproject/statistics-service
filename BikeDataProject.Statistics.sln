@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "root", "root", "{D4D7AB03-1
 		BikeDataProject.Statistics.sln = BikeDataProject.Statistics.sln
 		.gitignore = .gitignore
 		DEVELOPMENT.md = DEVELOPMENT.md
-		nuget.config = nuget.config
+		NuGet.Config.actions = NuGet.Config.actions
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{6AC1EF78-F736-45A6-8744-CE202782021C}"
