@@ -29,7 +29,8 @@ namespace BikeDataProject.Statistics.Service.Tiles
         public void Run()
         {
             var areas = _dbContext.Areas.Where(x => x.ParentAreaId == null)
-                .Include(x => x.AreaAttributes).ToList();
+                .Include(x => x.AreaAttributes)
+                .Include(x => x.AreaStatistics).ToList();
 
             IEnumerable<(IFeature feature, int zoom, string layerName)> ConfigureFeature(IFeature feature)
             {
