@@ -47,19 +47,28 @@ namespace BikeDataProject.Statistics.Service
                 
                 // write them.
                 var stats = _db.AreaStatistics.Where(x => x.AreaId == a.AreaId).ToList();
-                var countStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyCount) ??
-                                 new AreaStatistic() {Key = Constants.StatisticKeyCount, AreaId = a.AreaId};
+                var countStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyCount);
+                if (countStats == null)
+                {
+                    countStats = new AreaStatistic {Key = Constants.StatisticKeyCount, AreaId = a.AreaId};
+                    _db.AreaStatistics.Add(countStats);
+                }
                 countStats.Value = count;
-                var distanceStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyMeter) ??
-                                 new AreaStatistic() {Key = Constants.StatisticKeyMeter, AreaId = a.AreaId};
+                var distanceStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyMeter);
+                if (distanceStats == null)
+                {
+                    distanceStats = new AreaStatistic {Key = Constants.StatisticKeyMeter, AreaId = a.AreaId};
+                    _db.AreaStatistics.Add(distanceStats);
+                }
                 distanceStats.Value = distance;
-                var durationStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyTime) ??
-                                 new AreaStatistic() {Key = Constants.StatisticKeyTime, AreaId = a.AreaId};
+                var durationStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyTime);
+                if (durationStats == null)
+                {
+                    durationStats = new AreaStatistic {Key = Constants.StatisticKeyTime, AreaId = a.AreaId};
+                    _db.AreaStatistics.Add(durationStats);
+                }
                 durationStats.Value = duration;
 
-                _db.AreaStatistics.Add(countStats);
-                _db.AreaStatistics.Add(distanceStats);
-                _db.AreaStatistics.Add(durationStats);
                 _db.SaveChanges();
             }
         }

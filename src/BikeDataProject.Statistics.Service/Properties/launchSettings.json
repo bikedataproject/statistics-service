@@ -4,7 +4,8 @@
     "BikeDataProject.Statistics.Service": {
       "commandName": "Project",
       "environmentVariables": {
-        "BIKEDATA_DB":"placeholder"
+        "BIKEDATA_DB":"/data/work/bikedataproject/config/contributions.txt",
+        "BIKEDATA_STATS_DB":"/data/work/bikedataproject/config/statistics.txt"
       }
     }
   }

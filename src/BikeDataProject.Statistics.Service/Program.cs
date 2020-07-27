@@ -28,11 +28,6 @@ namespace BikeDataProject.Statistics.Service
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
-
-            foreach (var pair in configuration.AsEnumerable())
-            {
-                Console.WriteLine($"{pair.Key} {pair.Value}");
-            }
             
             // get database connection.
             var connectionString = File.ReadAllText(configuration[$"STATS_DB"]);
