@@ -82,7 +82,8 @@ namespace BikeDataProject.Statistics.Service.Tiles
 
                 var parentId = queue.Dequeue();
                 areas = _dbContext.Areas.Where(x => x.ParentAreaId == parentId)
-                    .Include(x => x.AreaAttributes).ToList();
+                    .Include(x => x.AreaAttributes)
+                    .Include(x => x.AreaStatistics).ToList();
             }
             
             vectorTileTree.Write(_configuration.OutputPath);
