@@ -10,6 +10,8 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
 {
     class Program
     {
+        internal const string EnvVarPrefix = "BIKEDATA_";
+        
         static async Task Main(string[] args)
         {
             // read configuration.
@@ -24,7 +26,7 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                 .CreateLogger();
             
             // get database connection.
-            var connectionString = configuration["BikeDataProject:Stats:ConnectionString"];
+            var connectionString = configuration[$"{Program.EnvVarPrefix}STATS_DB"];
             
             // setup DI.
             var serviceProvider = new ServiceCollection()
