@@ -23,7 +23,7 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
                 .CreateLogger();
             
             // get database connection.
-            var connectionString = configuration["ConnectionString"];
+            var connectionString = configuration["BikeDataProject:Stats:ConnectionString"];
             
             // setup DI.
             var serviceProvider = new ServiceCollection()

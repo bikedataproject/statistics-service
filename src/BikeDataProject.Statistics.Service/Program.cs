@@ -11,12 +11,15 @@ namespace BikeDataProject.Statistics.Service
 {
     class Program
     {
+        internal const string EnvVarPrefix = "BIKEDATA_";
+        
         static void Main(string[] args)
         {            
             // read configuration.
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddUserSecrets<Program>()
+                .AddEnvironmentVariables(prefix: EnvVarPrefix)
                 .Build();
             
             // setup serilog logging (from configuration).
@@ -25,8 +28,8 @@ namespace BikeDataProject.Statistics.Service
                 .CreateLogger();
             
             // get database connection.
-            var connectionString = configuration["ConnectionString"];
-            var bikeDataConnectionString = configuration["BikeDataProject:ConnectionString"];
+            var connectionString = configuration[$"{Program.EnvVarPrefix}STATS_DB"];
+            var bikeDataConnectionString = configuration[$"{Program.EnvVarPrefix}DB"];
             var data = configuration["data"];
             
             // setup DI.
