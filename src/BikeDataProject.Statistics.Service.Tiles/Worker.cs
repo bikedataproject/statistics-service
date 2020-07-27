@@ -108,11 +108,11 @@ namespace BikeDataProject.Statistics.Service.Tiles
             }
 
             if (!attributes.Exists(Constants.StatisticKeyCount))
-                attributes.Add(Constants.StatisticKeyCount,0);
+                attributes.Add(Constants.StatisticKeyCount,1);
             if (!attributes.Exists(Constants.StatisticKeyMeter))
-                attributes.Add(Constants.StatisticKeyMeter,0);
+                attributes.Add(Constants.StatisticKeyMeter,1);
             if (!attributes.Exists(Constants.StatisticKeyTime))
-                attributes.Add(Constants.StatisticKeyTime,0);
+                attributes.Add(Constants.StatisticKeyTime,1);
             
             if (area.AreaAttributes != null)
             {
