@@ -18,19 +18,25 @@ namespace BikeDataProject.Statistics.Service
             // read configuration.
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables(prefix: EnvVarPrefix)
+                .AddEnvironmentVariables((c) =>
+                {
+                    c.Prefix = EnvVarPrefix;
+                })
                 .Build();
             
             // setup serilog logging (from configuration).
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
+
+            foreach (var pair in configuration.AsEnumerable())
+            {
+                Console.WriteLine($"{pair.Key} {pair.Value}");
+            }
             
             // get database connection.
-            Console.WriteLine($"{configuration[$"{Program.EnvVarPrefix}STATS_DB"]}");
-            Console.WriteLine($"{configuration[$"{Program.EnvVarPrefix}DB"]}");
-            var connectionString = File.ReadAllText(configuration[$"{Program.EnvVarPrefix}STATS_DB"]);
-            var bikeDataConnectionString = File.ReadAllText(configuration[$"{Program.EnvVarPrefix}DB"]);
+            var connectionString = File.ReadAllText(configuration[$"STATS_DB"]);
+            var bikeDataConnectionString = File.ReadAllText(configuration[$"DB"]);
             var data = configuration["data"];
             
             // setup DI.
