@@ -1,4 +1,4 @@
-name: Docker Image Staging CD
+name: Docker Image - Statistics Tiles Service (Staging)
 
 on:
   push:
@@ -26,12 +26,12 @@ jobs:
         dotnet-version: 3.1.x
     - name: Publish project
       run: dotnet publish -c release
-      working-directory: ./src/BikeDataProject.Statistics.Service/
+      working-directory: ./src/BikeDataProject.Statistics.Service.Tiles/
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag bikedataproject/statistics-service:staging
-      working-directory: ./src/BikeDataProject.Statistics.Service/
+      run: docker build . --file Dockerfile --tag bikedataproject/statistics-service-tiles:staging
+      working-directory: ./src/BikeDataProject.Statistics.Service.Tiles/
     - name: Login to Dock Hub
       run: echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u anywaysopen --password-stdin
     - name: Publish the image to GitHub packages.
-      run: docker push bikedataproject/statistics-service:staging
-      working-directory: ./src/BikeDataProject.Statistics.Service/
+      run: docker push bikedataproject/statistics-service-tiles:staging
+      working-directory: ./src/BikeDataProject.Statistics.Service.Tiles/
