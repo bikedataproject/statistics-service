@@ -103,7 +103,7 @@ namespace BikeDataProject.Statistics.Service.Tiles
                 {
                     if (attributes.Exists(at.Key)) continue;
                     
-                    attributes.Add(at.Key, at.Value);
+                    attributes.Add(at.Key, (long)at.Value);
                 }
             }
 
