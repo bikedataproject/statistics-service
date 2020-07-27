@@ -47,27 +47,42 @@ namespace BikeDataProject.Statistics.Service
                 
                 // write them.
                 var stats = _db.AreaStatistics.Where(x => x.AreaId == a.AreaId).ToList();
+                
                 var countStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyCount);
                 if (countStats == null)
                 {
                     countStats = new AreaStatistic {Key = Constants.StatisticKeyCount, AreaId = a.AreaId};
                     _db.AreaStatistics.Add(countStats);
                 }
-                countStats.Value = count;
+                else
+                {
+                    countStats.Value = count;
+                    _db.AreaStatistics.Update(countStats);
+                }
+                
                 var distanceStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyMeter);
                 if (distanceStats == null)
                 {
                     distanceStats = new AreaStatistic {Key = Constants.StatisticKeyMeter, AreaId = a.AreaId};
                     _db.AreaStatistics.Add(distanceStats);
                 }
-                distanceStats.Value = distance;
+                else
+                {
+                    distanceStats.Value = distance;
+                    _db.AreaStatistics.Update(distanceStats);
+                }
+                
                 var durationStats = stats.FirstOrDefault(x => x.Key == Constants.StatisticKeyTime);
                 if (durationStats == null)
                 {
                     durationStats = new AreaStatistic {Key = Constants.StatisticKeyTime, AreaId = a.AreaId};
                     _db.AreaStatistics.Add(durationStats);
                 }
-                durationStats.Value = duration;
+                else
+                {
+                    durationStats.Value = duration;
+                    _db.AreaStatistics.Update(durationStats);
+                }
 
                 _db.SaveChanges();
             }
