@@ -13,12 +13,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Prepare NuGet.Config
+      uses: datamonsters/replace-action@v2
+      with:
+        files: 'NuGet.Config.actions'
+        replacements: '%%username%%=xivk,%%token%%=${{ secrets.PACKAGES_SECRET }}'
+    - run: mv NuGet.Config.actions NuGet.Config 
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 3.1.x
     - name: Install dependencies
-      run: dotnet restore
+      run: dotnet restore 
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Test
