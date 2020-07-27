@@ -111,8 +111,8 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
             if (!attributes.Exists(Constants.StatisticKeyCount))
                 attributes.Add(Constants.StatisticKeyCount,
                     Random.Next(10000));
-            if (!attributes.Exists(Constants.StatisticKeyKms))
-                attributes.Add(Constants.StatisticKeyKms,
+            if (!attributes.Exists(Constants.StatisticKeyMeter))
+                attributes.Add(Constants.StatisticKeyMeter,
                     Random.Next(10000));
             if (!attributes.Exists(Constants.StatisticKeyTime))
                 attributes.Add(Constants.StatisticKeyTime,

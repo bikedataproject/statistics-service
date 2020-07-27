@@ -4,7 +4,7 @@ namespace BikeDataProject.Statistics
 {
     public static class Constants
     {
-        public static string StatisticKeyKms = "km";
+        public static string StatisticKeyMeter = "meters";
 
         public static string StatisticKeyTime = "seconds";
 

@@ -1,35 +1,54 @@
 ﻿using System;
+using BikeDataProject.DB.Domain;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace BikeDataProject.Statistics.Service
 {
     class Program
     {
         static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
-        
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureAppConfiguration((hostContext, builder) =>
+        {            
+            // read configuration.
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddUserSecrets<Program>()
+                .Build();
+            
+            // setup serilog logging (from configuration).
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .CreateLogger();
+            
+            // get database connection.
+            var connectionString = configuration["ConnectionString"];
+            var bikeDataConnectionString = configuration["BikeDataProject:ConnectionString"];
+            var data = configuration["data"];
+            
+            // setup DI.
+            var serviceProvider = new ServiceCollection()
+                .AddLogging(b =>
                 {
-                    if (hostContext.HostingEnvironment.IsDevelopment())
-                    {
-                        builder.AddUserSecrets<Program>();
-                    }
+                    b.AddSerilog();
                 })
-                .ConfigureServices((hostContext, services) =>
+                .AddSingleton<Worker>()
+                .AddSingleton(new WorkerConfiguration()
                 {
-                    var connectionString =
-                        hostContext.Configuration["ConnectionString"];
-                    services.AddDbContext<StatisticsDbContext>(
-                        options => options.UseNpgsql(connectionString));
-                    services.AddHostedService<Worker>();
-                });
+                    DataPath = data
+                })
+                .AddDbContext<StatisticsDbContext>(
+                    options => options.UseNpgsql(connectionString))
+                .AddDbContext<BikeDataDbContext>(
+                    options => options.UseNpgsql(bikeDataConnectionString))
+                .BuildServiceProvider();
+            
+            //do the actual work here
+            var task = serviceProvider.GetService<Worker>();
+            task.Run();
+        }
     }
 }
