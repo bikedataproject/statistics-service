@@ -4,10 +4,10 @@ namespace BikeDataProject.Statistics
 {
     public static class Constants
     {
-        public static string StatisticKeyMeter = "meters";
+        public const string StatisticKeyMeter = "meters";
 
-        public static string StatisticKeyTime = "seconds";
+        public const string StatisticKeyTime = "seconds";
 
-        public static string StatisticKeyCount = "count";
+        public const string StatisticKeyCount = "count";
     }
 }
