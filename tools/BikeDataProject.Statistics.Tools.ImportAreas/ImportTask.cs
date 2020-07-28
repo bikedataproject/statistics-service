@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BikeDataProject.Statistics.Domain;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.IO;
@@ -28,10 +29,23 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
             // load boundaries.
             var boundaries = this.LoadBoundaries();
             
-            // add all to db.
+            // load areas and index them by id.
             var map = new Dictionary<long, Area>();
+            var areas = _dbContext.Areas
+                .Include(x => x.AreaAttributes);
+            foreach (var area in areas)
+            {
+                var idAttributes = area.AreaAttributes.FirstOrDefault(x => x.Key == "id");
+                if (idAttributes == null) continue;
+                if (!long.TryParse(idAttributes.Value, out var id)) continue;
+
+                map[id] = area;
+                boundaries.Remove(id);
+            }
+
+            // add all to db.
             var postGisWriter = new PostGisWriter();
-            while (map.Count < boundaries.Count)
+            while (boundaries.Count > 0)
             {
                 // get boundaries with all parents done.
                 var queue = new Queue<long>();
@@ -51,6 +65,7 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                 {
                     var next = queue.Dequeue();
                     var nextValue = boundaries[next];
+                    boundaries.Remove(next);
 
                     // get parent area.
                     if (nextValue.parent == -1 || 
@@ -73,14 +88,14 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                     foreach (var name in nextValue.feature.Attributes.GetNames())
                     {
                         if (string.IsNullOrWhiteSpace(name)) continue;
-                        if (name == "id" || name == "parents") continue;
+                        if (name == "parents") continue;
 
                         var value = nextValue.feature.Attributes[name];
                         if (!(value is string valueString))
                         {
-                            if (value is long)
+                            if (value is long l)
                             {
-                                valueString = ((long) value).ToString();
+                                valueString = l.ToString();
                             }
                             else
                             {
