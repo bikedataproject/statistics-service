@@ -1,12 +1,17 @@
-# statistics service
+# Statistics Service  :bicyclist: :bicyclist: :bicyclist:
 
 ## About this repository
 
 [![.NET Core](https://github.com/bikedataproject/statistic-api/workflows/.NET%20Core/badge.svg)](https://github.com/bikedataproject/statistics-service/actions?query=workflow%3A%22.NET+Core%22)  
-[![Docker Image - Statistics Service (Staging)](https://github.com/bikedataproject/statistics-service/workflows/Docker%20Image%20-%20Statistics%20Service%20(Staging)/badge.svg)](https://github.com/bikedataproject/statistics-service/actions?query=workflow%3A%22Docker+Image+-+Statistics+Service+%28Staging%29%22)  
-[![Docker Image - Statistics Tiles Service (Staging)](https://github.com/bikedataproject/statistics-service/workflows/Docker%20Image%20-%20Statistics%20Tiles%20Service%20(Staging)/badge.svg)](https://github.com/bikedataproject/statistics-service/actions?query=workflow%3A%22Docker+Image+-+Statistics+Tiles+Service+%28Staging%29%22)  
 
-This repository contains code for the statistics service. A small service to generate basic statistics on the collected data. 
+This repository contains code for the statistics service. A small service to generate basic statistics on the collected data. There are two services in this repo:
+
+- BikeDataProject.Statistics.Service: Aggregrates data from the  main bike data project database onto boundaries taken from OSM.
+- BikeDataProject.Statistics.Service.Tiles: Publish the aggregated data as Mapbox vector tiles.
+
+These together generate the map on our website:
+
+![statistics-map](./docs/screenshot1.png)
 
 ## Coding conventions
 
