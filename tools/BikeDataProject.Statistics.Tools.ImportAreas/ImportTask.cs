@@ -29,31 +29,41 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
             // load boundaries.
             var boundaries = this.LoadBoundaries();
             
-            // load areas and index them by id.
-            var map = new Dictionary<long, Area>();
-            var areas = _dbContext.Areas
-                .Include(x => x.AreaAttributes);
-            foreach (var area in areas)
+            // remove areas that exist.
+            var existing = new HashSet<long>();
+            foreach (var (key, _) in boundaries)
             {
-                var idAttributes = area.AreaAttributes.FirstOrDefault(x => x.Key == "id");
-                if (idAttributes == null) continue;
-                if (!long.TryParse(idAttributes.Value, out var id)) continue;
-
-                map[id] = area;
-                boundaries.Remove(id);
+                var area = this.GetAreaById(key);
+                if (area != null) existing.Add(key);
             }
-
+            foreach (var r in existing)
+            {
+                boundaries.Remove(r);
+            }
+            
             // add all to db.
             var postGisWriter = new PostGisWriter();
             while (boundaries.Count > 0)
             {
                 // get boundaries with all parents done.
+                var parents = new Dictionary<long, Area>();
                 var queue = new Queue<long>();
                 foreach (var (key, (_, parent)) in boundaries)
                 {
-                    if (map.ContainsKey(key)) continue;
-                    if (parent != -1 && !map.ContainsKey(parent)) continue;
-                    
+                    if (parent == -1)
+                    {
+                        queue.Enqueue(key);
+                        continue;
+                    }
+
+                    if (!parents.TryGetValue(parent, out var parentArea))
+                    { 
+                        parentArea = this.GetAreaById(parent);
+                        if (parentArea == null) continue;
+                        
+                        parents[parent] = parentArea;
+                    }
+
                     queue.Enqueue(key);
                 }
                 
@@ -69,7 +79,7 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
 
                     // get parent area.
                     if (nextValue.parent == -1 || 
-                        !map.TryGetValue(nextValue.parent, out var parentArea))
+                        !parents.TryGetValue(nextValue.parent, out var parentArea))
                     {
                         parentArea = null;
                     }
@@ -83,7 +93,6 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                     };
                     await _dbContext.Areas.AddAsync(area);
                     await _dbContext.SaveChangesAsync();
-                    map[next] = area;
                     
                     foreach (var name in nextValue.feature.Attributes.GetNames())
                     {
@@ -91,6 +100,7 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                         if (name == "parents") continue;
 
                         var value = nextValue.feature.Attributes[name];
+                        if (name == "name") _logger.LogInformation($"Importing {value}...");
                         if (!(value is string valueString))
                         {
                             if (value is long l)
@@ -114,6 +124,13 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                     await _dbContext.SaveChangesAsync();
                 }
             }
+        }
+
+        private Area GetAreaById(long id)
+        {
+            var area = _dbContext.AreaAttributes.Where(x => x.Key == "id" && x.Value == id.ToString())
+                .Include(x => x.Area).FirstOrDefault();
+            return area?.Area;
         }
 
         private Dictionary<long, (IFeature feature, long parent)> LoadBoundaries()

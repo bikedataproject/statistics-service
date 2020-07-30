@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Threading.Tasks;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using NetTopologySuite.IO.VectorTiles;
 using NetTopologySuite.IO.VectorTiles.Mapbox;
+using Serilog;
 
 namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
 {
@@ -29,10 +28,33 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
 
         public void Run()
         {
-            var areas = _dbContext.Areas.Where(x => x.ParentAreaId == null)
-                .Include(x => x.AreaAttributes).ToList();
+            // do for zoom levels 0 -> 5.
+            var areas = GetForZoom(5);
+            var vectorTileTree = new VectorTileTree();
+            var areaCount = 0;
+            foreach (var area in areas)
+            {
+                var areaFeature = ToFeature(area);
+                var features = new FeatureCollection {areaFeature};
+                vectorTileTree.Add(features, Get(0, 5));
 
-            IEnumerable<(IFeature feature, int zoom, string layerName)> ConfigureFeature(IFeature feature)
+                areaCount++;
+                Log.Information($"Area count: {areaCount}: {Name(area)} ({vectorTileTree.Count})");
+            }
+            
+            vectorTileTree.Write(_configuration.OutputPath);
+        }
+
+        private string Name(Area area)
+        {
+            var nameAttribute = area.AreaAttributes.FirstOrDefault(x => x.Key == "name");
+            if (nameAttribute == null) return string.Empty;
+            return nameAttribute.Value;
+        }
+
+        private VectorTileTreeExtensions.ToFeatureZoomAndLayerFunc Get(int minZoom, int maxZoom)
+        {
+            System.Collections.Generic.IEnumerable<(IFeature feature, int zoom, string layerName)> ConfigureFeature(IFeature feature)
             {
                 if (feature.Attributes == null) yield break;
                 if (!feature.Attributes.Exists("admin_level")) yield break;
@@ -46,6 +68,7 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
                     // country level.
                     for (var z = 0; z <= 7; z++)
                     {
+                        if (z < minZoom || z > maxZoom) continue;
                         yield return (feature, z, "areas");
                     }
                     yield break;
@@ -55,40 +78,27 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
                     // regional level.
                     for (var z = 7; z <= 10; z++)
                     {
+                        if (z < minZoom || z > maxZoom) continue;
                         yield return (feature, z, "areas");
                     }
                     yield break;
                 }
                 for (var z = 10; z <= 14; z++)
                 {
+                    if (z < minZoom || z > maxZoom) continue;
                     yield return (feature, z, "areas");
                 }
             }
-            
-            var vectorTileTree = new VectorTileTree();
-            var queue = new Queue<int>();
-            while (true)
-            {
-                foreach (var area in areas)
-                {
-                    var areaFeature = ToFeature(area);
-                    var features = new FeatureCollection {areaFeature};
-                    vectorTileTree.Add(features, ConfigureFeature);
 
-                    queue.Enqueue(area.AreaId);
-                }
-                
-                if (queue.Count == 0) break;
-
-                var parentId = queue.Dequeue();
-                areas = _dbContext.Areas.Where(x => x.ParentAreaId == parentId)
-                    .Include(x => x.AreaAttributes).ToList();
-            }
-            
-            vectorTileTree.Write(_configuration.OutputPath);
+            return ConfigureFeature;
         }
 
         private readonly Random Random = new Random();
+        
+        private IEnumerable<Area> GetForZoom(int zoom, (double left, double bottom, double right, double top)? box = null)
+        {
+            return _dbContext.Areas.Where(x => true).Include(x => x.AreaAttributes).Include(x => x.AreaStatistics);
+        }
         
         private Feature ToFeature(Area area)
         {

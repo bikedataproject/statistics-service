@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.6" />
@@ -12,12 +13,15 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.6" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.0.1" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
     <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="2.0.2" />
     <PackageReference Include="NetTopologySuite.IO.PostGis" Version="2.0.0" />
     <PackageReference Include="NetTopologySuite.IO.VectorTiles.Mapbox" Version="0.0.14" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\anyways\libraries\NetTopologySuite.IO.VectorTiles\src\NetTopologySuite.IO.VectorTiles.Mapbox\NetTopologySuite.IO.VectorTiles.Mapbox.csproj" />
     <ProjectReference Include="..\..\src\BikeDataProject.Statistics\BikeDataProject.Statistics.csproj" />
   </ItemGroup>
   <ItemGroup>

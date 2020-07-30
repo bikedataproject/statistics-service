@@ -26,7 +26,7 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                 .Build();
             
             // setup serilog logging (from configuration).
-            var logger = new LoggerConfiguration()
+            Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
             

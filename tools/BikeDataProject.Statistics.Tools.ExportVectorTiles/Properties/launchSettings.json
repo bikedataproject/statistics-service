@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "BikeDataProject.Statistics.Tools.ExportVectorTiles": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "BIKEDATA_DB":"/data/work/bikedataproject/config/contributions.txt",
+        "BIKEDATA_STATS_DB":"/data/work/bikedataproject/config/statistics.txt"        
+      }
+    }
+  }
+}
