@@ -28,9 +28,7 @@ namespace BikeDataProject.Statistics.Service.Tiles
 
         public void Run()
         {
-            var areas = _dbContext.Areas.Where(x => x.ParentAreaId == null)
-                .Include(x => x.AreaAttributes)
-                .Include(x => x.AreaStatistics).ToList();
+            var areas = this.GetAreas();
 
             IEnumerable<(IFeature feature, int zoom, string layerName)> ConfigureFeature(IFeature feature)
             {
@@ -39,7 +37,8 @@ namespace BikeDataProject.Statistics.Service.Tiles
 
                 var adminLevelValue = feature.Attributes["admin_level"];
                 if (!(adminLevelValue is string adminLevelString)) yield break;
-                if (!long.TryParse(adminLevelString, NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var adminLevel)) yield break;
+                if (!long.TryParse(adminLevelString, NumberStyles.Any,
+                    System.Globalization.CultureInfo.InvariantCulture, out var adminLevel)) yield break;
 
                 if (adminLevel == 2)
                 {
@@ -48,8 +47,10 @@ namespace BikeDataProject.Statistics.Service.Tiles
                     {
                         yield return (feature, z, "areas");
                     }
+
                     yield break;
                 }
+
                 if (adminLevel > 2 && adminLevel <= 4)
                 {
                     // regional level.
@@ -57,38 +58,35 @@ namespace BikeDataProject.Statistics.Service.Tiles
                     {
                         yield return (feature, z, "areas");
                     }
+
                     yield break;
                 }
+
                 for (var z = 10; z <= 14; z++)
                 {
                     yield return (feature, z, "areas");
                 }
             }
-            
+
             var vectorTileTree = new VectorTileTree();
-            var queue = new Queue<int>();
-            while (true)
+            foreach (var area in areas)
             {
-                foreach (var area in areas)
+                var areaFeature = ToFeature(area);
+                var features = new FeatureCollection {areaFeature};
+
+                try
                 {
-                    var areaFeature = ToFeature(area);
-                    var features = new FeatureCollection {areaFeature};
                     vectorTileTree.Add(features, ConfigureFeature);
-
-                    queue.Enqueue(area.AreaId);
                 }
-                
-                if (queue.Count == 0) break;
-
-                var parentId = queue.Dequeue();
-                areas = _dbContext.Areas.Where(x => x.ParentAreaId == parentId)
-                    .Include(x => x.AreaAttributes)
-                    .Include(x => x.AreaStatistics).ToList();
+                catch (Exception e)
+                {
+                    _logger.LogError(e, $"Unhandled exception while processing area {area.AreaId}");
+                }
             }
-            
+
             vectorTileTree.Write(_configuration.OutputPath);
         }
-        
+
         private Feature ToFeature(Area area)
         {
             var postGisReader = new PostGisReader();
@@ -126,6 +124,29 @@ namespace BikeDataProject.Statistics.Service.Tiles
 
             var geometry = postGisReader.Read(area.Geometry);
             return new Feature(geometry, attributes);
+        }
+
+        private IEnumerable<Area> GetAreas()
+        {
+            var c = _dbContext.Areas.Count();
+            var pageSize = 100;
+            var returned = 0;
+            while (returned < c)
+            {
+                var page = _dbContext.Areas.Include(x => x.AreaAttributes)
+                    .Include(x => x.AreaStatistics).OrderBy(i => i.AreaId).Skip(returned)
+                    .Take(pageSize).ToList();
+                var i = 0;
+                foreach (var a in page)
+                {
+                    var name = a.AreaAttributes.Where(x => x.Key == "name").Select(x => x.Value).FirstOrDefault();
+                    _logger.LogInformation($"Processing {i+returned+1}/{c} {name}...");
+                    i++;
+                    yield return a;
+                }
+
+                returned += pageSize;
+            }
         }
     }
 }

@@ -36,10 +36,12 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
             {
                 var areaFeature = ToFeature(area);
                 var features = new FeatureCollection {areaFeature};
-                vectorTileTree.Add(features, Get(0, 5));
+                
+                Log.Information($"Tiling {Name(area)}...");
+                vectorTileTree.Add(features, Get(0, 0));
 
                 areaCount++;
-                Log.Information($"Area count: {areaCount}: {Name(area)} ({vectorTileTree.Count})");
+                Log.Information($"Area count: {areaCount}: {Name(area)}");
             }
             
             vectorTileTree.Write(_configuration.OutputPath);
@@ -97,7 +99,13 @@ namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
         
         private IEnumerable<Area> GetForZoom(int zoom, (double left, double bottom, double right, double top)? box = null)
         {
-            return _dbContext.Areas.Where(x => true).Include(x => x.AreaAttributes).Include(x => x.AreaStatistics);
+            return _dbContext.Areas.FromSqlRaw("select a.*" +
+                                                    "from \"Areas\" a " +
+                                                    "inner join \"AreaAttributes\" aa " +
+                                                    "on a.\"AreaId\" = aa.\"AreaId\" " +
+                                                    "where aa.\"Key\" = 'admin_level' and aa.\"Value\" in ('2')")
+                .Include(x => x.AreaAttributes)
+                .Include(x => x.AreaStatistics);
         }
         
         private Feature ToFeature(Area area)

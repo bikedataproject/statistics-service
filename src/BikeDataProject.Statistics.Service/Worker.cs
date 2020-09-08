@@ -206,8 +206,20 @@ namespace BikeDataProject.Statistics.Service
 
         internal IEnumerable<Area> GetAreasWithoutChildren()
         {
-            return _db.Areas.Include(x => x.ChildAreas)
-                .Where(x => x.ChildAreas.Count == 0).ToList();
+            var c = _db.Areas.Count();
+            var pageSize = 100;
+            var returned = 0;
+            while (returned < c)
+            {
+                var page = _db.Areas.Where(x => x.ChildAreas.Count == 0).OrderBy(i => i.AreaId).Skip(returned)
+                    .Take(pageSize).ToList();
+                foreach (var a in page)
+                {
+                    yield return a;
+                }
+
+                returned += pageSize;
+            }
         }
     }
 }

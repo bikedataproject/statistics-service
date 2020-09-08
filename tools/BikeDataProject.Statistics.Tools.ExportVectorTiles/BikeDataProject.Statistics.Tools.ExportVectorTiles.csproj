@@ -18,7 +18,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.6" />
     <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="2.0.2" />
     <PackageReference Include="NetTopologySuite.IO.PostGis" Version="2.0.0" />
-    <PackageReference Include="NetTopologySuite.IO.VectorTiles.Mapbox" Version="0.0.14" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\anyways\libraries\NetTopologySuite.IO.VectorTiles\src\NetTopologySuite.IO.VectorTiles.Mapbox\NetTopologySuite.IO.VectorTiles.Mapbox.csproj" />
