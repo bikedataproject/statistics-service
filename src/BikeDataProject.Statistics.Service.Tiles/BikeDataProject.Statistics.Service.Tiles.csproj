@@ -21,6 +21,7 @@
     <PackageReference Include="NetTopologySuite.IO.VectorTiles.Mapbox" Version="0.0.14" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\db\src\BikeDataProject.DB\BikeDataProject.DB.csproj" />
     <ProjectReference Include="..\..\src\BikeDataProject.Statistics\BikeDataProject.Statistics.csproj" />
   </ItemGroup>
   <ItemGroup>
