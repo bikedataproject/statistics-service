@@ -27,8 +27,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.Statistics.Service.Tiles", "src\BikeDataProject.Statistics.Service.Tiles\BikeDataProject.Statistics.Service.Tiles.csproj", "{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BikeDataProject.DB", "..\db\src\BikeDataProject.DB\BikeDataProject.DB.csproj", "{2B350894-8D51-4173-8BEC-9697CFCD5E6E}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,18 +100,6 @@ Global
 		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|x64.Build.0 = Release|Any CPU
 		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|x86.ActiveCfg = Release|Any CPU
 		{E77A51E3-BED8-46E5-B347-E7EA5134DAC6}.Release|x86.Build.0 = Release|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Debug|x64.Build.0 = Debug|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Debug|x86.Build.0 = Debug|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Release|x64.ActiveCfg = Release|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Release|x64.Build.0 = Release|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Release|x86.ActiveCfg = Release|Any CPU
-		{2B350894-8D51-4173-8BEC-9697CFCD5E6E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C4FE2DBC-3D55-46C0-BA43-6D5216356CDD} = {0CC83EC2-6EC0-4858-BCEF-E91959BF172B}

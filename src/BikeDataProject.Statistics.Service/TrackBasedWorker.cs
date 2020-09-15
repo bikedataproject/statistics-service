@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using BikeDataProject.DB.Domain;
 using BikeDataProject.Statistics.Domain;
@@ -29,51 +30,102 @@ namespace BikeDataProject.Statistics.Service
 
         public void Run()
         {
-            /*
-             * The time when the last update of the database was performed
-             * TODO actually save this somewhere
-             */
-            var lastUpdateTime = new DateTime(2020, 08, 01);
-
-            /*
-             * The end time.
-             * Every contribution between 'lastUpdateTime' and 'now' will be taken into account and updated.
-             * NB: we only take contribution.startDate into account for this interval
-             */
-            var now = DateTime.Now;
-
-
-            var contributions = _bikeDataDb.Contributions
-                .Where(contribution =>
-                    lastUpdateTime <= contribution.TimeStampStart && contribution.TimeStampStart < now);
-
-
-            var topLevelAreas = _statisticsDb.Areas
+            CheckAreaStatistics();
+            var allAreas = _statisticsDb.Areas
                 .Include(x => x.AreaStatistics) // Add all the statistics. Otherwise, they'll be 'null'
                 .ToList(); // Group them as a list. We might need them all anyway, there's not too much of them and we can't have multiple open queries at the same time
 
-            foreach (var area in topLevelAreas)
+            if (!allAreas.Any())
             {
-                if (area.ParentAreaId != null)
-                {
-                    continue;
-                }
+                throw new Exception(
+                    "No areas loaded. Did you forget to import the areas? (Don't worry, I forget about it too - hence why there is an error here)");
+            }
 
-                _logger.Log(LogLevel.Information, "Found a top level area");
+            while (HandleChunk(allAreas)) ;
+        }
 
-                foreach (var contribution in contributions)
+        /**
+         * Handles 1000 contributions and commits to the database. Returns true if more work is to be done
+         */
+        private bool HandleChunk(List<Area> allAreas, int chunkCount = 1000)
+        {
+            var lastUpdateIds = _statisticsDb.UpdateCounts.Where(update => update.UpdateCountId == 1);
+
+            UpdateCount lastUpdateId;
+            if (!lastUpdateIds.Any())
+            {
+                lastUpdateId = new UpdateCount {LastProcessedEntry = 0, UpdateCountId = 1};
+                _statisticsDb.Add(lastUpdateId);
+            }
+            else
+            {
+                lastUpdateId = lastUpdateIds.First();
+            }
+
+            var lowestId = lastUpdateId.LastProcessedEntry;
+            _logger.Log(LogLevel.Information, $"Last processed entry is {lowestId}");
+            var contributions = _bikeDataDb.Contributions
+                .Where(contribution =>
+                    contribution.ContributionId > lowestId)
+                .Take(chunkCount);
+
+            if (!contributions.Any())
+            {
+                return false;
+            }
+
+            var lastContribution = lowestId;
+
+            var topLevelAreas = TopLevelAreas(allAreas);
+            foreach (var contribution in contributions)
+            {
+                foreach (var area in topLevelAreas)
                 {
-                    HandleTrack(contribution, area);
+                    try
+                    {
+                        lastContribution = contribution.ContributionId;
+                        HandleTrack(contribution, area);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Log(LogLevel.Error,
+                            $"Could not handle track {contribution.ContributionId}: crashed: {e.Message}");
+                    }
                 }
             }
 
+            lastUpdateId.LastProcessedEntry = lastContribution;
             _logger.Log(LogLevel.Information,
-                $"Updated the statistics for {contributions.Count()} tracks between {lastUpdateTime} to {now}");
+                $"Updated the statistics for {contributions.Count()} tracks between #{lowestId} to {lastContribution}");
+            _statisticsDb.UpdateCounts.Update(lastUpdateId);
             _statisticsDb.SaveChanges();
+            return true;
+        }
+
+        private List<Area> TopLevelAreas(IEnumerable<Area> areas)
+        {
+            var topLevelAreas = new List<Area>();
+            foreach (var area in areas)
+            {
+                if (area.ParentAreaId == null)
+                {
+                    topLevelAreas.Add(area);
+                }
+            }
+
+            return topLevelAreas;
         }
 
         private void HandleTrack(Contribution contribution, Area topLevelArea)
         {
+            if (contribution.PointsGeom == null)
+            {
+                // Hmm
+                _logger.Log(LogLevel.Information,
+                    $"Not adding track {contribution.ContributionId}, geometry is empty");
+                return;
+            }
+
             var contributionGeometry = _postGisReader.Read(contribution.PointsGeom);
             var contributionBBox = contributionGeometry.Envelope;
             // Update the toplevel area
@@ -105,14 +157,53 @@ namespace BikeDataProject.Statistics.Service
             }
         }
 
+        /// <summary>
+        /// Makes sure that all the areas have initialized statistics
+        /// </summary>
+        private void CheckAreaStatistics()
+        {
+            var statsMissing = _statisticsDb.Areas.Include(a => a.AreaStatistics)
+                .Where(a => a.AreaStatistics == null || a.AreaStatistics.Count() == 0);
+            if (!statsMissing.Any())
+            {
+                return;
+            }
+
+            _logger.Log(LogLevel.Information, "Initializing all statistics");
+            foreach (var area in statsMissing)
+            {
+                area.AreaStatistics = new List<AreaStatistic>
+                {
+                    new AreaStatistic
+                    {
+                        AreaId = area.AreaId,
+                        Key = Constants.StatisticKeyCount,
+                        Value = 0
+                    },
+                    new AreaStatistic
+                    {
+                        AreaId = area.AreaId,
+                        Key = Constants.StatisticKeyTime,
+                        Value = 0
+                    },
+                    new AreaStatistic
+                    {
+                        AreaId = area.AreaId,
+                        Key = Constants.StatisticKeyMeter,
+                        Value = 0
+                    }
+                };
+                _statisticsDb.AreaStatistics.AddRange(area.AreaStatistics);
+            }
+
+            _statisticsDb.SaveChanges();
+        }
+
         private void UpdateStatistics(Area area, Contribution c)
         {
             AreaStatistic distanceStat = null;
             AreaStatistic countStat = null;
             AreaStatistic timeStat = null;
-            if (area.AreaStatistics == null)
-            {
-            }
 
             foreach (var stat in area.AreaStatistics)
             {
@@ -131,44 +222,13 @@ namespace BikeDataProject.Statistics.Service
                 }
             }
 
-            if (distanceStat == null)
-            {
-                distanceStat = new AreaStatistic
-                {
-                    Key = Constants.StatisticKeyMeter,
-                    Value = 0
-                };
-                _statisticsDb.AreaStatistics.Add(distanceStat);
-            }
-
-            if (countStat == null)
-            {
-                countStat = new AreaStatistic
-                {
-                    Key = Constants.StatisticKeyCount,
-                    Value = 0
-                };
-                _statisticsDb.AreaStatistics.Add(countStat);
-            }
-
-
-            if (timeStat == null)
-            {
-                timeStat = new AreaStatistic
-                {
-                    Key = Constants.StatisticKeyTime,
-                    Value = 0
-                };
-                _statisticsDb.AreaStatistics.Add(timeStat);
-            }
-
             distanceStat.Value += c.Distance;
             _statisticsDb.AreaStatistics.Update(distanceStat);
-
             countStat.Value++;
             _statisticsDb.AreaStatistics.Update(countStat);
-
-            timeStat.Value += (decimal) (c.TimeStampStop - c.TimeStampStart).TotalSeconds;
+            var time = (decimal) (c.TimeStampStop - c.TimeStampStart).TotalSeconds;
+            time = Math.Abs(time);
+            timeStat.Value += time;
             _statisticsDb.AreaStatistics.Update(timeStat);
         }
     }
