@@ -39,7 +39,7 @@ namespace BikeDataProject.Statistics.Service.Tiles
                 .AddSingleton<Worker>()
                 .AddSingleton(new WorkerConfiguration()
                 {
-                    OutputPath = configuration["data"]
+                    OutputPath = configuration["tileOutputDirectory"]
                 })
                 .AddDbContext<StatisticsDbContext>(
                     options => options.UseNpgsql(connectionString))

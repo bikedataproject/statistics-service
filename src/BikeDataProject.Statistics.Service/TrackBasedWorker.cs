@@ -5,6 +5,7 @@ using BikeDataProject.DB.Domain;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 
 namespace BikeDataProject.Statistics.Service
@@ -14,6 +15,18 @@ namespace BikeDataProject.Statistics.Service
     /// </summary>
     public class TrackBasedWorker
     {
+        private string GeometryToGeojson(Geometry geometry)
+        {
+            var geojsonParts = new List<string>();
+            foreach (var c in geometry.Coordinates)
+            {
+                geojsonParts.Add($"[{c.X},{c.Y}]");
+            }
+
+            return string.Join(",", geojsonParts);
+        }
+
+
         private static readonly PostGisReader _postGisReader = new PostGisReader();
 
         private readonly BikeDataDbContext _bikeDataDb;
@@ -31,23 +44,25 @@ namespace BikeDataProject.Statistics.Service
         public void Run()
         {
             CheckAreaStatistics();
-            var allAreas = _statisticsDb.Areas
-                .Include(x => x.AreaStatistics) // Add all the statistics. Otherwise, they'll be 'null'
+            var topLevelAreas = _statisticsDb.Areas
+                .Where(a => a.ParentAreaId == null)
                 .ToList(); // Group them as a list. We might need them all anyway, there's not too much of them and we can't have multiple open queries at the same time
 
-            if (!allAreas.Any())
+            if (!topLevelAreas.Any())
             {
                 throw new Exception(
                     "No areas loaded. Did you forget to import the areas? (Don't worry, I forget about it too - hence why there is an error here)");
             }
 
-            while (HandleChunk(allAreas)) ;
+            _logger.LogInformation($"Loaded {topLevelAreas.Count} top level areas");
+
+            while (HandleChunk(topLevelAreas)) ;
         }
 
         /**
          * Handles 1000 contributions and commits to the database. Returns true if more work is to be done
          */
-        private bool HandleChunk(List<Area> allAreas, int chunkCount = 1000)
+        private bool HandleChunk(List<Area> topLevelAreas, int chunkCount = 1000)
         {
             var lastUpdateIds = _statisticsDb.UpdateCounts.Where(update => update.UpdateCountId == 1);
 
@@ -56,11 +71,13 @@ namespace BikeDataProject.Statistics.Service
             {
                 lastUpdateId = new UpdateCount {LastProcessedEntry = 0, UpdateCountId = 1};
                 _statisticsDb.Add(lastUpdateId);
+                _statisticsDb.SaveChanges();
+                // We retry
+                return true;
+                
             }
-            else
-            {
-                lastUpdateId = lastUpdateIds.First();
-            }
+
+            lastUpdateId = lastUpdateIds.First();
 
             var lowestId = lastUpdateId.LastProcessedEntry;
             _logger.Log(LogLevel.Information, $"Last processed entry is {lowestId}");
@@ -76,97 +93,123 @@ namespace BikeDataProject.Statistics.Service
 
             var lastContribution = lowestId;
 
-            var topLevelAreas = TopLevelAreas(allAreas);
             foreach (var contribution in contributions)
             {
+                lastContribution = contribution.ContributionId;
+                var contributionGeometry = _postGisReader.Read(contribution.PointsGeom);
+                var contributionBBox = contributionGeometry.Envelope;
+                var addedToNAreas = 0;
+                var start = DateTime.Now;
                 foreach (var area in topLevelAreas)
                 {
                     try
                     {
-                        lastContribution = contribution.ContributionId;
-                        HandleTrack(contribution, area);
+                        addedToNAreas += HandleTrack(contribution, area,
+                            contributionGeometry, contributionBBox);
                     }
                     catch (Exception e)
                     {
+                        Console.WriteLine(e);
                         _logger.Log(LogLevel.Error,
                             $"Could not handle track {contribution.ContributionId}: crashed: {e.Message}");
                     }
                 }
+
+                Console.WriteLine(
+                    $"Track {lastContribution} was added to {addedToNAreas} areas in {(DateTime.Now - start).TotalMilliseconds}ms");
             }
 
             lastUpdateId.LastProcessedEntry = lastContribution;
+            _statisticsDb.UpdateCounts.Update(lastUpdateId);
+
             _logger.Log(LogLevel.Information,
                 $"Updated the statistics for {contributions.Count()} tracks between #{lowestId} to {lastContribution}");
-            _statisticsDb.UpdateCounts.Update(lastUpdateId);
             _statisticsDb.SaveChanges();
             return true;
         }
 
-        private List<Area> TopLevelAreas(IEnumerable<Area> areas)
-        {
-            var topLevelAreas = new List<Area>();
-            foreach (var area in areas)
-            {
-                if (area.ParentAreaId == null)
-                {
-                    topLevelAreas.Add(area);
-                }
-            }
+        private Dictionary<int, Geometry> areaBBoxes = new Dictionary<int, Geometry>();
+        private Dictionary<int, Geometry> areaGeometries = new Dictionary<int, Geometry>();
 
-            return topLevelAreas;
-        }
-
-        private void HandleTrack(Contribution contribution, Area topLevelArea)
+        private int HandleTrack(Contribution contribution,
+            Area topLevelArea,
+            Geometry contributionGeometry,
+            Geometry contributionBBox)
         {
+            var addedToNAreas = 0;
             if (contribution.PointsGeom == null)
             {
                 // Hmm
                 _logger.Log(LogLevel.Information,
                     $"Not adding track {contribution.ContributionId}, geometry is empty");
-                return;
+                return addedToNAreas;
             }
 
-            var contributionGeometry = _postGisReader.Read(contribution.PointsGeom);
-            var contributionBBox = contributionGeometry.Envelope;
+            _statisticsDb.Entry(topLevelArea).Collection(a => a.AreaStatistics).Load();
+
+
+            if (!areaGeometries.TryGetValue(topLevelArea.AreaId, out var areaGeometry))
+            {
+                areaGeometry = areaGeometries[topLevelArea.AreaId] = _postGisReader.Read(topLevelArea.Geometry);
+            }
+
+            if (!areaBBoxes.TryGetValue(topLevelArea.AreaId, out var areaBBox))
+            {
+                areaBBox = areaBBoxes[topLevelArea.AreaId] = areaGeometry.Envelope;
+            }
+
+            if (!areaBBox.Covers(contributionBBox))
+            {
+                // The child area bbox doesn't cover the contribution bbox -> we don't care
+                return addedToNAreas;
+            }
+
+            if (!areaGeometry.Covers(contributionGeometry))
+            {
+                return addedToNAreas;
+            }
+
+
             // Update the toplevel area
             UpdateStatistics(topLevelArea, contribution);
+            addedToNAreas++;
+            // Load the child areas from the database
+            _statisticsDb.Entry(topLevelArea).Collection(a => a.ChildAreas).Load();
 
             if (topLevelArea.ChildAreas == null)
             {
                 // We have reached the bottom
-                return;
+                return addedToNAreas;
             }
+
 
             foreach (var childArea in topLevelArea.ChildAreas)
             {
-                var childGeometry = _postGisReader.Read(childArea.Geometry);
-                var childBBox = childGeometry.Envelope;
-                if (!childBBox.Covers(contributionBBox))
-                {
-                    // The child area bbox doesn't cover the contribution bbox -> we don't care
-                    continue;
-                }
-
-                if (!childGeometry.Covers(contributionGeometry))
-                {
-                    continue;
-                }
-
                 // Recursively handle this child area to update the stats of the childarea and it's children
-                HandleTrack(contribution, childArea);
+                addedToNAreas += HandleTrack(contribution, childArea, contributionGeometry, contributionBBox);
             }
+
+            return addedToNAreas;
+        }
+
+
+        private void CheckAreaStatistics()
+        {
+            while (CheckAreaStatisticsChunked()) ;
         }
 
         /// <summary>
         /// Makes sure that all the areas have initialized statistics
         /// </summary>
-        private void CheckAreaStatistics()
+        private bool CheckAreaStatisticsChunked()
         {
-            var statsMissing = _statisticsDb.Areas.Include(a => a.AreaStatistics)
-                .Where(a => a.AreaStatistics == null || a.AreaStatistics.Count() == 0);
+            var statsMissing = _statisticsDb.Areas
+                .Include(a => a.AreaStatistics)
+                .Where(a => a.AreaStatistics == null || !a.AreaStatistics.Any())
+                .Take(1000);
             if (!statsMissing.Any())
             {
-                return;
+                return false;
             }
 
             _logger.Log(LogLevel.Information, "Initializing all statistics");
@@ -197,6 +240,7 @@ namespace BikeDataProject.Statistics.Service
             }
 
             _statisticsDb.SaveChanges();
+            return true;
         }
 
         private void UpdateStatistics(Area area, Contribution c)

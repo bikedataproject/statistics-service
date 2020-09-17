@@ -101,6 +101,7 @@ START WITH 1
           CACHE 1
           );
 
+CREATE INDEX "IX_Areas_ParentAreaId" ON public."Areas" USING btree ("ParentAreaId");
 
 --
 -- TOC entry 196 (class 1259 OID 42248)
