@@ -14,8 +14,11 @@ namespace BikeDataProject.Statistics.Service
         internal const string EnvVarPrefix = "BIKEDATA_";
         
         static void Main(string[] args)
-        {            
+        {
             // read configuration.
+            // Note that some configuration parameters are provided in 'launchSettings.json'
+            // Launchsettings.json contains the paths of the secrets
+            // In the actual docker deployment, this path should be '/run/secrets/<secret name>'
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables((c) =>
