@@ -6,6 +6,7 @@
     <UserSecretsId>7f51910b-8084-4ec1-b452-01f146683483</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\db\src\BikeDataProject.DB\BikeDataProject.DB.csproj" />
     <ProjectReference Include="..\BikeDataProject.Statistics\BikeDataProject.Statistics.csproj" />
   </ItemGroup>
   <ItemGroup>

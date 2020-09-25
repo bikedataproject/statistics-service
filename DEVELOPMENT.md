@@ -2,6 +2,12 @@
 
 Because the Entity Framework model and context are in a netstandard classlib project the startup project needs to be specified.
 
+##### Start a docker container
+
+    sudo docker run --name statistics-test -p 5432:5432 -e POSTGRES_PASSWORD=password postgis/postgis
+
+Connect with pg-admin, execute create_db.sql
+
 ##### Add migrations
 
     cd ./src/BikeDataProject.Statistics/

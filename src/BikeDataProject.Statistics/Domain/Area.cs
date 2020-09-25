@@ -6,12 +6,13 @@ namespace BikeDataProject.Statistics.Domain
     {
         public int AreaId { get; set; }
         
-        public byte[] Geometry { get; set; }
+        public virtual byte[] Geometry { get; set; }
         
         public int? ParentAreaId { get; set; }
         
         public Area ParentArea { get; set; }
         
+        // The childareas are 'virtual' to have them loaded lazily when needed
         public List<Area> ChildAreas { get; set; }
         
         public List<AreaAttribute> AreaAttributes { get; set; }

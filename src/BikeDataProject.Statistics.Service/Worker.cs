@@ -1,18 +1,17 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using BikeDataProject.DB.Domain;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.IO;
 
 namespace BikeDataProject.Statistics.Service
 {
+    
+    /// <summary>
+    /// The actual service code which creates the statistics
+    /// </summary>
     public class Worker
     {
         private readonly BikeDataDbContext _bikeDataDb;
@@ -185,13 +184,8 @@ namespace BikeDataProject.Statistics.Service
             var postGisReader = new PostGisReader();
             // query bike data, get all data in the envelope around the geometry..
             var geometry = postGisReader.Read(a.Geometry);
-            var envelope = geometry.EnvelopeInternal;
-            var left = envelope.MinX;
-            var right = envelope.MaxX;
-            var top = envelope.MaxY;
-            var bottom = envelope.MinY;
             var sql = $"select * from \"Contributions\" where \"PointsGeom\" && " +
-                      $"ST_MakeEnvelope({left}, {bottom}, {right}, {top}, 4326)"; 
+                      $"{geometry.EnvelopeToSQLQuery()}"; 
             var contributions = _bikeDataDb.Contributions
                 .FromSqlRaw(sql)
                 .ToList();

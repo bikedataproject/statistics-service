@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,8 @@ using Serilog;
 
 namespace BikeDataProject.Statistics.Tools.ExportVectorTiles
 {
+    // Will be replaced by the service
+    [Obsolete]
     class Program
     {
         internal const string EnvVarPrefix = "BIKEDATA_";
