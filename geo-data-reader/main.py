@@ -14,7 +14,9 @@ for c in pycountry.countries:
 
     try:
         # Download country geojson file
-        r = requests.get(f"https://osm-boundaries.com/Download/Submit?apiKey={api_token}&osmIds=-{location.raw['osm_id']}&recursive&minAdminLevel=2&maxAdminLevel=6&landOnly")
+	    url = f"https://osm-boundaries.com/Download/Submit?apiKey={api_token}&db=osm20200907&osmIds=-{location.raw['osm_id']}&recursive&minAdminLevel=2&maxAdminLevel=6&includeAllTags&simplify=1"
+        print("Downloading: "+url);
+        r = requests.get(url)
 
         if r.status_code == 200:
             # Store .gz file
@@ -31,6 +33,6 @@ for c in pycountry.countries:
             os.remove(f"gz/{c.name}.gz")
             print(f"Downloaded {c.name}")
         else:
-            print("Did not receive HTTP 200")
+            print("ERROR: Did not receive HTTP 200")
     except Exception as e:
         print(f"Could not download {e}")
