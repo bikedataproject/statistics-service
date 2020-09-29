@@ -2,6 +2,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/code,visualstudiocode,windows,linux,macos,visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=code,visualstudiocode,windows,linux,macos,visualstudio
 
+geo-data-reader/geojson/*
+geo-data-reader/gz/*
+
 ### Code ###
 .vscode/*
 !.vscode/settings.json
