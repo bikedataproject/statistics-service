@@ -39,7 +39,7 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                 .AddSingleton<ImportTask>()
                 .AddSingleton(new ImportTaskConfiguration()
                 {
-                    DataPath = configuration["data"]
+                    DataPath = configuration["boundaryDataDirectory"]
                 })
                 .AddDbContext<StatisticsDbContext>(
                         options => options.UseNpgsql(connectionString))

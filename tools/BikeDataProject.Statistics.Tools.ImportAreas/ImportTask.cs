@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -113,6 +114,8 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
                     }
                     await _dbContext.SaveChangesAsync();
                 }
+
+                Console.WriteLine("All done!");
             }
         }
 
@@ -122,48 +125,66 @@ namespace BikeDataProject.Statistics.Tools.ImportAreas
             
             // read all boundaries from geojson.
             var geoJsonReader = new GeoJsonReader();
+            var failedCountries = new List<string>();
             foreach (var file in Directory.EnumerateFiles(_configuration.DataPath, "*.geojson"))
             {
-                var features = geoJsonReader.Read<FeatureCollection>(
-                    File.ReadAllText(file));
-
-                foreach (var feature in features)
+                Console.WriteLine($"Handling {file}");
+                try
                 {
-                    if (feature.Attributes == null) continue;
-                    if (!feature.Attributes.Exists("id")) continue;
-                    
-                    var idValue = feature.Attributes["id"];
-                    if (!(idValue is long)) continue;
-                    var id = (long) idValue;
-                    
-                    var parentId = -1L;
-                    if (feature.Attributes.Exists("parents"))
-                    {
-                        var parents = feature.Attributes["parents"];
-                        if (parents is string parentString &&
-                            !string.IsNullOrWhiteSpace(parentString))
-                        {
-                            var parentSplit = parentString.Split(',');
-                            if (parentSplit.Length > 0)
-                            {
-                                foreach (var parentIdString in parentSplit)
-                                {
-                                    if (!long.TryParse(parentIdString, NumberStyles.Any,
-                                        System.Globalization.CultureInfo.InvariantCulture, out parentId))
-                                    {
-                                        parentId = -1;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    
-                    boundaries[id] = (feature, parentId);
+                    HandleCountry(geoJsonReader, file, boundaries);
+                }
+                catch (Exception e)
+                {
+                    failedCountries.Add(file);
+                    Console.WriteLine(e);
+                    _logger.LogError(message: "Could not handle "+file+": "+e.Message);
                 }
             }
 
+            Console.WriteLine("Failed:\n" + string.Join("\n", failedCountries));
             return boundaries;
+        }
+
+        private static void HandleCountry(GeoJsonReader geoJsonReader, string file, Dictionary<long, (IFeature feature, long parent)> boundaries)
+        {
+            var features = geoJsonReader.Read<FeatureCollection>(
+                File.ReadAllText(file));
+
+            foreach (var feature in features)
+            {
+                if (feature.Attributes == null) continue;
+                if (!feature.Attributes.Exists("id")) continue;
+
+                var idValue = feature.Attributes["id"];
+                if (!(idValue is long)) continue;
+                var id = (long) idValue;
+
+                var parentId = -1L;
+                if (feature.Attributes.Exists("parents"))
+                {
+                    var parents = feature.Attributes["parents"];
+                    if (parents is string parentString &&
+                        !string.IsNullOrWhiteSpace(parentString))
+                    {
+                        var parentSplit = parentString.Split(',');
+                        if (parentSplit.Length > 0)
+                        {
+                            foreach (var parentIdString in parentSplit)
+                            {
+                                if (!long.TryParse(parentIdString, NumberStyles.Any,
+                                    CultureInfo.InvariantCulture, out parentId))
+                                {
+                                    parentId = -1;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                boundaries[id] = (feature, parentId);
+            }
         }
     }
 }
