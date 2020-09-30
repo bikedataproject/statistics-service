@@ -62,7 +62,7 @@ namespace BikeDataProject.Statistics.Service
         /**
          * Handles 1000 contributions and commits to the database. Returns true if more work is to be done
          */
-        private bool HandleChunk(List<Area> topLevelAreas, int chunkCount = 1000)
+        private bool HandleChunk(List<Area> topLevelAreas, int chunkCount = 1000, bool reset = false)
         {
             var lastUpdateIds = _statisticsDb.UpdateCounts.Where(update => update.UpdateCountId == 1);
 
@@ -74,10 +74,18 @@ namespace BikeDataProject.Statistics.Service
                 _statisticsDb.SaveChanges();
                 // We retry
                 return true;
-                
             }
 
+
             lastUpdateId = lastUpdateIds.First();
+            if (reset)
+            {
+                _logger.LogWarning("Resetting statistic count. Don't do this in production.");
+                lastUpdateId.LastProcessedEntry = 0;
+                _statisticsDb.Update(lastUpdateId);
+                _statisticsDb.SaveChanges();
+                return true;
+            }
 
             var lowestId = lastUpdateId.LastProcessedEntry;
             _logger.Log(LogLevel.Information, $"Last processed entry is {lowestId}");
@@ -88,6 +96,7 @@ namespace BikeDataProject.Statistics.Service
 
             if (!contributions.Any())
             {
+                _logger.LogInformation("All new tracks have been handled");
                 return false;
             }
 
@@ -95,28 +104,27 @@ namespace BikeDataProject.Statistics.Service
 
             foreach (var contribution in contributions)
             {
-                lastContribution = contribution.ContributionId;
-                var contributionGeometry = _postGisReader.Read(contribution.PointsGeom);
-                var contributionBBox = contributionGeometry.Envelope;
-                var addedToNAreas = 0;
-                var start = DateTime.Now;
-                foreach (var area in topLevelAreas)
+                try
                 {
-                    try
+                    lastContribution = contribution.ContributionId;
+                    var contributionGeometry = _postGisReader.Read(contribution.PointsGeom);
+                    var contributionBBox = contributionGeometry.Envelope;
+                    var addedToNAreas = 0;
+                    var start = DateTime.Now;
+                    foreach (var area in topLevelAreas)
                     {
                         addedToNAreas += HandleTrack(contribution, area,
                             contributionGeometry, contributionBBox);
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                        _logger.Log(LogLevel.Error,
-                            $"Could not handle track {contribution.ContributionId}: crashed: {e.Message}");
-                    }
-                }
 
-                Console.WriteLine(
-                    $"Track {lastContribution} was added to {addedToNAreas} areas in {(DateTime.Now - start).TotalMilliseconds}ms");
+                    _logger.LogDebug(
+                        $"Track {lastContribution} was added to {addedToNAreas} areas in {(DateTime.Now - start).TotalMilliseconds}ms");
+                }
+                catch (Exception e)
+                {
+                    _logger.Log(LogLevel.Error,
+                        $"Could not handle track {contribution.ContributionId}: crashed: {e.Message}");
+                }
             }
 
             lastUpdateId.LastProcessedEntry = lastContribution;
@@ -158,13 +166,13 @@ namespace BikeDataProject.Statistics.Service
                 areaBBox = areaBBoxes[topLevelArea.AreaId] = areaGeometry.Envelope;
             }
 
-            if (!areaBBox.Covers(contributionBBox))
+            if (!areaBBox.Intersects(contributionBBox))
             {
                 // The child area bbox doesn't cover the contribution bbox -> we don't care
                 return addedToNAreas;
             }
 
-            if (!areaGeometry.Covers(contributionGeometry))
+            if (!areaGeometry.Intersects(contributionGeometry))
             {
                 return addedToNAreas;
             }

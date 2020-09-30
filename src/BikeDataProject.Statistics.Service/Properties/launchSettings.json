@@ -5,8 +5,8 @@
       "commandName": "Project",
       "environmentVariables": {
         "BIKEDATA_DB":"/data/work/bikedataproject/config/contributions.txt",
-        "BIKEDATA_STATS_DB":"/data/work/bikedataproject/config/statistics.txt"
+        "BIKEDATA_STATS_DB":"/data/work/bikedataproject/config/statistics-production.txt"
       }
     }
   }
-}
+} 

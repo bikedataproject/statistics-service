@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using BikeDataProject.DB.Domain;
 using BikeDataProject.Statistics.Domain;
 using Microsoft.EntityFrameworkCore;
