@@ -35,45 +35,80 @@ namespace BikeDataProject.Statistics.Service.Tiles
                 Directory.CreateDirectory(_configuration.OutputPath);
             }
 
-            var areas = _dbContext.Areas.Where(x => x.ParentAreaId == null)
+            var parentAreas = _dbContext.Areas.Where(x => x.ParentAreaId == null)
                 .Include(x => x.AreaAttributes)
-                .Include(x => x.AreaStatistics);
+                .ToList();
 
-            var total = areas.Count();
-            var count = 0;
 
             var vectorTileTree = new VectorTileTree();
-            var queue = new Queue<int>();
-            var start = DateTime.Now;
-            foreach (var area in areas)
-            {
-                var areaFeature = ToFeature(area);
-                var features = new FeatureCollection {areaFeature};
-                vectorTileTree.Add(features, ConfigureFeature);
-
-                queue.Enqueue(area.AreaId);
-                count++;
-                var end = DateTime.Now;
-                Console.WriteLine($"Exported area ${count}/${total} in {(end - start).TotalMilliseconds}ms");
-            }
+            ExportRecursive(parentAreas, vectorTileTree);
 
             vectorTileTree.Write(_configuration.OutputPath);
         }
 
+        private void ExportRecursive(List<Area> parentAreas, VectorTileTree vectorTileTree)
+        {
+            foreach (var area in parentAreas)
+            {
+                _dbContext.Entry(area).Collection(a => a.AreaAttributes).Load();
+
+                var (areaFeature, name) = ToFeature(area);
+                var features = new FeatureCollection {areaFeature};
+                try
+                {
+                    vectorTileTree.Add(features, ConfigureFeature);
+                }
+                catch (Exception e)
+                {
+                    _logger.Log(LogLevel.Error, e.Message);
+                    Console.WriteLine(e);
+                    continue;
+                }
+
+                _logger.Log(LogLevel.Information, $"Exported area {name}");
+                // Load the child areas from the database
+                _dbContext.Entry(area).Collection(a => a.ChildAreas).Load();
+
+                if (area.ChildAreas.Count != 0)
+                {
+                    _logger.Log(LogLevel.Information, $"Exporting {area.ChildAreas.Count} childs");
+                    ExportRecursive(area.ChildAreas.ToList(), vectorTileTree);
+                }
+
+                // Make sure these can be garbage collected!
+                area.ChildAreas = null;
+            }
+        }
+
+
         private IEnumerable<(IFeature feature, int zoom, string layerName)> ConfigureFeature(IFeature feature)
         {
-            if (feature.Attributes == null) yield break;
-            if (!feature.Attributes.Exists("admin_level")) yield break;
+            if (feature.Attributes == null)
+            {
+                yield break;
+            }
+
+            if (!feature.Attributes.Exists("admin_level"))
+            {
+                yield break;
+            }
+
             if (feature.Attributes.Exists("name"))
             {
-                Console.WriteLine($"Exporting area {feature.Attributes["name"]}");
                 _logger.LogDebug($"Exporting area {feature.Attributes["name"]}");
             }
 
             var adminLevelValue = feature.Attributes["admin_level"];
-            if (!(adminLevelValue is string adminLevelString)) yield break;
+            if (!(adminLevelValue is string adminLevelString))
+            {
+                yield break;
+            }
+
             if (!long.TryParse(adminLevelString, NumberStyles.Any, CultureInfo.InvariantCulture,
-                out var adminLevel)) yield break;
+                out var adminLevel))
+            {
+                yield break;
+            }
 
             if (adminLevel == 2)
             {
@@ -103,30 +138,16 @@ namespace BikeDataProject.Statistics.Service.Tiles
             }
         }
 
-        private Feature ToFeature(Area area)
+        private (Feature, string name) ToFeature(Area area)
         {
             var postGisReader = new PostGisReader();
-            var attributes = new AttributesTable();
-
-            attributes.Add("id", area.AreaId);
-            attributes.Add("parent_id", area.ParentAreaId);
-
-            if (area.AreaStatistics != null)
+            var attributes = new AttributesTable
             {
-                foreach (var at in area.AreaStatistics)
-                {
-                    if (attributes.Exists(at.Key)) continue;
+                {"id", area.AreaId},
+                {"parent_id", area.ParentAreaId},
+            };
 
-                    attributes.Add(at.Key, (long) at.Value);
-                }
-            }
-
-            if (!attributes.Exists(Constants.StatisticKeyCount))
-                attributes.Add(Constants.StatisticKeyCount, 1);
-            if (!attributes.Exists(Constants.StatisticKeyMeter))
-                attributes.Add(Constants.StatisticKeyMeter, 1);
-            if (!attributes.Exists(Constants.StatisticKeyTime))
-                attributes.Add(Constants.StatisticKeyTime, 1);
+            var name = "";
 
             if (area.AreaAttributes != null)
             {
@@ -134,12 +155,17 @@ namespace BikeDataProject.Statistics.Service.Tiles
                 {
                     if (attributes.Exists(at.Key)) continue;
 
+                    if (at.Key == "name")
+                    {
+                        name = at.Value;
+                    }
+
                     attributes.Add(at.Key, at.Value);
                 }
             }
 
             var geometry = postGisReader.Read(area.Geometry);
-            return new Feature(geometry, attributes);
+            return (new Feature(geometry, attributes), name);
         }
     }
 }
