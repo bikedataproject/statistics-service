@@ -34,7 +34,11 @@ namespace BikeDataProject.Statistics.Service.Tiles
             
             // setup DI.
             var serviceProvider = new ServiceCollection()
-                .AddLogging()
+                .AddLogging(c =>
+                {
+                    c.AddFilter((category, level) =>
+                        (category != DbLoggerCategory.Database.Command.Name && level <= LogLevel.Information));
+                })
                 .AddSingleton<Worker>()
                 .AddSingleton(new WorkerConfiguration()
                 {

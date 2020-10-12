@@ -39,8 +39,7 @@ namespace BikeDataProject.Statistics.Service.Export
             foreach (var area in areas)
             {
                 current++;
-
-
+                
                 if (area.AreaStatistics.All(stat => stat.Value == 0))
                 {
                     // It is empty anyway...

@@ -42,17 +42,28 @@ namespace BikeDataProject.Statistics.Service.Tiles
 
             var vectorTileTree = new VectorTileTree();
             ExportRecursive(parentAreas, vectorTileTree);
-
-            vectorTileTree.Write(_configuration.OutputPath);
+            
+            IEnumerable<VectorTile> GetTiles()
+            {
+                foreach (ulong tileId in vectorTileTree)
+                {
+                    var tile = new NetTopologySuite.IO.VectorTiles.Tiles.Tile(tileId);
+                    _logger.LogInformation($"Exporting {tile.Zoom}/{tile.X}{tile.Y}.");
+                    yield return vectorTileTree[tileId];
+                }
+            }
+            GetTiles().Write(_configuration.OutputPath);
         }
 
-        private void ExportRecursive(List<Area> parentAreas, VectorTileTree vectorTileTree)
+        private void ExportRecursive(IReadOnlyList<Area> parentAreas, VectorTileTree vectorTileTree)
         {
-            foreach (var area in parentAreas)
+            for (var a=  0; a < parentAreas.Count; a++)
             {
+                var area = parentAreas[a];
                 _dbContext.Entry(area).Collection(a => a.AreaAttributes).Load();
 
                 var (areaFeature, name) = ToFeature(area);
+                _logger.Log(LogLevel.Information, $"Exporting {a+1}/{parentAreas.Count}: {name}");
                 var features = new FeatureCollection {areaFeature};
                 try
                 {
@@ -65,15 +76,14 @@ namespace BikeDataProject.Statistics.Service.Tiles
                     continue;
                 }
 
-                _logger.Log(LogLevel.Information, $"Exported area {name}");
-                // Load the child areas from the database
-                _dbContext.Entry(area).Collection(a => a.ChildAreas).Load();
-
-                if (area.ChildAreas.Count != 0)
-                {
-                    _logger.Log(LogLevel.Information, $"Exporting {area.ChildAreas.Count} childs");
-                    ExportRecursive(area.ChildAreas.ToList(), vectorTileTree);
-                }
+                // // Load the child areas from the database
+                // _dbContext.Entry(area).Collection(a => a.ChildAreas).Load();
+                //
+                // if (area.ChildAreas.Count != 0)
+                // {
+                //     _logger.Log(LogLevel.Information, $"Exporting {area.ChildAreas.Count} children");
+                //     ExportRecursive(area.ChildAreas.ToList(), vectorTileTree);
+                // }
 
                 // Make sure these can be garbage collected!
                 area.ChildAreas = null;
