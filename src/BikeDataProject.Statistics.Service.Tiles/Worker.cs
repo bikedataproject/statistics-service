@@ -55,7 +55,7 @@ namespace BikeDataProject.Statistics.Service.Tiles
             GetTiles().Write(_configuration.OutputPath);
         }
 
-        private void ExportRecursive(IReadOnlyList<Area> parentAreas, VectorTileTree vectorTileTree)
+        private void ExportRecursive(IReadOnlyList<Area> parentAreas, VectorTileTree vectorTileTree, uint level = 0)
         {
             for (var a=  0; a < parentAreas.Count; a++)
             {
@@ -63,7 +63,7 @@ namespace BikeDataProject.Statistics.Service.Tiles
                 _dbContext.Entry(area).Collection(a => a.AreaAttributes).Load();
 
                 var (areaFeature, name) = ToFeature(area);
-                _logger.Log(LogLevel.Information, $"Exporting {a+1}/{parentAreas.Count}: {name}");
+                _logger.Log(LogLevel.Information, $"Exporting {level} - {a+1}/{parentAreas.Count}: {name}");
                 var features = new FeatureCollection {areaFeature};
                 try
                 {
@@ -76,14 +76,14 @@ namespace BikeDataProject.Statistics.Service.Tiles
                     continue;
                 }
 
-                // // Load the child areas from the database
-                // _dbContext.Entry(area).Collection(a => a.ChildAreas).Load();
-                //
-                // if (area.ChildAreas.Count != 0)
-                // {
-                //     _logger.Log(LogLevel.Information, $"Exporting {area.ChildAreas.Count} children");
-                //     ExportRecursive(area.ChildAreas.ToList(), vectorTileTree);
-                // }
+                // Load the child areas from the database
+                _dbContext.Entry(area).Collection(a => a.ChildAreas).Load();
+                
+                if (area.ChildAreas.Count != 0)
+                {
+                    _logger.Log(LogLevel.Information, $"Exporting {area.ChildAreas.Count} children");
+                    ExportRecursive(area.ChildAreas.ToList(), vectorTileTree, level + 1);
+                }
 
                 // Make sure these can be garbage collected!
                 area.ChildAreas = null;
@@ -141,11 +141,13 @@ namespace BikeDataProject.Statistics.Service.Tiles
 
                 yield break;
             }
+            
+            yield break;
 
-            for (var z = 10; z <= 14; z++)
-            {
-                yield return (feature, z, "areas");
-            }
+            // for (var z = 10; z <= 14; z++)
+            // {
+            //     yield return (feature, z, "areas");
+            // }
         }
 
         private (Feature, string name) ToFeature(Area area)
