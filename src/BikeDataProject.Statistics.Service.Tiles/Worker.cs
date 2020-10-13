@@ -123,7 +123,7 @@ namespace BikeDataProject.Statistics.Service.Tiles
             if (adminLevel == 2)
             {
                 // country level.
-                for (var z = 0; z <= 7; z++)
+                for (var z = 0; z < 8; z++)
                 {
                     yield return (feature, z, "areas");
                 }
@@ -134,20 +134,18 @@ namespace BikeDataProject.Statistics.Service.Tiles
             if (adminLevel > 2 && adminLevel <= 4)
             {
                 // regional level.
-                for (var z = 7; z <= 10; z++)
+                for (var z = 8; z < 10; z++)
                 {
                     yield return (feature, z, "areas");
                 }
 
                 yield break;
             }
-            
-            yield break;
 
-            // for (var z = 10; z <= 14; z++)
-            // {
-            //     yield return (feature, z, "areas");
-            // }
+            for (var z = 10; z <= 14; z++)
+            {
+                 yield return (feature, z, "areas");
+            }
         }
 
         private (Feature, string name) ToFeature(Area area)
